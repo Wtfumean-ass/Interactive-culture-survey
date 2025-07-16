@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Culture Survey</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: auto; }
+    input[type=number] { width: 60px; }
+    label { display: block; margin: 10px 0 5px; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+    #grafico { margin-top: 50px; }
+  </style>
+</head>
+<body>
+  <h1>Survey: Your Personal Culture vs National Culture</h1>
+  <form id="culturaForm">
+    <label>1. How independent do you feel? (1–100)</label>
+    <input type="number" name="q1" min="1" max="100" required>
+
+    <label>2. How much does personal achievement motivate you? (1–100)</label>
+    <input type="number" name="q2" min="1" max="100" required>
+
+    <label>3. How comfortable are you with uncertainty? (1–100)</label>
+    <input type="number" name="q3" min="1" max="100" required>
+
+    <label>4. How much do you rely on rules or hierarchy? (1–100)</label>
+    <input type="number" name="q4" min="1" max="100" required>
+
+    <label>5. How much do you plan for the long-term? (1–100)</label>
+    <input type="number" name="q5" min="1" max="100" required>
+
+    <label>6. How much do you indulge in leisure and pleasure? (1–100)</label>
+    <input type="number" name="q6" min="1" max="100" required>
+
+    <label>What is your nationality? (Italy, Japan, China, South Korea, Spain, France, Ireland, Germany, USA, Ecuador, Chile, Mexico)</label>
+    <input type="text" name="nazionalita" required>
+
+    <button type="submit">Submit and Compare</button>
+  </form>
+
+  <div id="grafico"></div>
+
+  <script>
+    document.getElementById('culturaForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const form = e.target;
+
+      const userValues = [
+        +form.q4.value, // PDI
+        +form.q1.value, // IDV
+        +form.q2.value, // MAS
+        +form.q3.value, // UAI
+        +form.q5.value, // LTO
+        +form.q6.value  // IVR
+      ];
+
+      const stato = form.nazionalita.value.trim().toLowerCase();
+
+      const officialData = {
+        italy: [50, 76, 70, 75, 61, 30],
+        japan: [54, 46, 95, 92, 88, 42],
+        usa: [40, 91, 62, 46, 26, 68],
+        germany: [35, 67, 66, 65, 83, 40],
+        france: [68, 71, 43, 86, 63, 48],
+        china: [80, 20, 66, 30, 87, 24],
+        "south korea": [60, 18, 39, 85, 100, 29],
+        spain: [57, 51, 42, 86, 48, 44],
+        ireland: [28, 70, 68, 35, 24, 65],
+        ecuador: [78, 8, 63, 67, 25, 63],
+        chile: [63, 23, 28, 86, 31, 68],
+        mexico: [81, 30, 69, 82, 24, 97]
+      };
+
+      const officialValues = officialData[stato] || [50, 50, 50, 50, 50, 50]; // default fallback
+
+      const dimensions = ["PDI", "IDV", "MAS", "UAI", "LTO", "IVR"];
+
+      const data = [
+        {
+          type: 'scatterpolar',
+          r: userValues,
+          theta: dimensions,
+          fill: 'toself',
+          name: 'You'
+        },
+        {
+          type: 'scatterpolar',
+          r: officialValues,
+          theta: dimensions,
+          fill: 'toself',
+          name: stato.charAt(0).toUpperCase() + stato.slice(1)
+        }
+      ];
+
+      const layout = {
+        polar: {
+          radialaxis: {
+            visible: true,
+            range: [0, 100]
+          }
+        },
+        showlegend: true
+      };
+
+      Plotly.newPlot('grafico', data, layout);
+    });
+  </script>
+</body>
+</html>
